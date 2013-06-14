@@ -1,0 +1,44 @@
+{
+  "name": "grunt-parallel-behat",
+  "description": "Run Behat Features in Parallel.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/linusnorton/grunt-parallel-behat",
+  "author": {
+    "name": "Linus Norton",
+    "url": "http://github.com/linusnorton"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/linusnorton/grunt-parallel-behat"
+  },
+  "bugs": {
+    "url": "https://github.com/linusnorton/grunt-parallel-behat/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/linusnorton/grunt-parallel-behat/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "underscore": "~1.4.x",
+    "grunt-lib-contrib": "~0.5.1"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.2.0",
+    "grunt-mocha-test": "~0.4.0"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.0"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
