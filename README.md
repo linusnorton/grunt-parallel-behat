@@ -22,15 +22,11 @@ grunt.loadNpmTasks('grunt-parallel-behat');
 ### Basic (using default options)
 
 ```javascript
-
 grunt.loadNpmTasks('grunt-parallel-behat');
-
 ```
 
 ```sh
-
-grunt behat
-
+> grunt behat
 ```
 
 By default it will assume the behat.yml is in the same folder as the grunt file and it will run any feature files under the current directory.
