@@ -33,7 +33,9 @@
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.2.0",
-    "grunt-mocha-test": "~0.4.0"
+    "grunt-mocha-test": "~0.4.0",
+    "mocha": "1.9.x",
+    "chai": "1.5.x"
   },
   "peerDependencies": {
     "grunt": "~0.4.0"
