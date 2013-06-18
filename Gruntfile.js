@@ -30,6 +30,11 @@ module.exports = function(grunt) {
         src: ['test/**/*.js'],
         dest: 'coverage.html'
       }
+    },
+
+    behat: {
+        maxProcesses: 5,
+        flags: '--tags @wip'
     }
 
   });

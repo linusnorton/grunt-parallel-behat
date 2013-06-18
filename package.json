@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "underscore": "~1.4.x",
-    "grunt-lib-contrib": "~0.5.1"
+    "grunt-lib-contrib": "~0.5.1",
+    "glob": "~3.2.x"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.2.0",
