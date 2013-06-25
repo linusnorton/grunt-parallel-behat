@@ -16,6 +16,7 @@ var glob = require('glob'),
 
 module.exports = function(grunt) {
     var options = _.defaults(grunt.config('behat'), defaults),
+        startTime = +new Date(),
         queue = [],
         completed = 0,
         processes = 0,
@@ -23,10 +24,10 @@ module.exports = function(grunt) {
         done;
 
     function runFiles (err, files) {
-        if (err) throw err;
-
         total = files.length;
         queue = files;
+
+        grunt.log.writeln('Found ' + total + ' feature file(s). Running ' + options.maxProcesses + ' at a time: ');
 
         // try to run them all
         files.forEach(runFile);
@@ -44,32 +45,51 @@ module.exports = function(grunt) {
     }
 
     function runBehat (file) {
-
         var cmd = [options.bin, '-c', options.config, options.flags, options.baseDir + file].join(' ');
-        grunt.log.writeln('Running ' + (++processes + completed) + ' of ' + total + ': ' + cmd);
+        grunt.log.writeln('Started ' + (++processes + completed) + ' of ' + total + ': ' + file );
 
         exec(cmd, {cwd: options.cwd}, _.partial(processResults, file));
     }
 
     function processResults (file, err, stdout, stderr) {
-        completed++;
+        var output = stdout.split('\n');
+
         processes--;
 
-        //if (err) throw err;
+        if (err && err.code === 13) {
+            grunt.log.writeln('Timeout: ' + file + ' adding to the back of the queue.');
 
-        if (stderr) {
-            grunt.log.writeln(stderr);
+            queue.push(file);
+            next();
+
+            return;
+        }
+        else if (err && err.code === 1) {
+            grunt.log.writeln('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+        }
+        else if (err) {
+            grunt.log.writeln('Failed: ' + file + ' with error code ' + err.code + '\n' + err + stdout);
         }
         else {
-            grunt.log.writeln('Test passed: ' + file);
+            grunt.log.writeln('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
         }
 
+        completed++;
+
         if (queue.length === 0) {
-            done();
+            finish();
         }
         else {
             next();
         }
+    }
+
+    function finish () {
+        var finishTime = +new Date(),
+            totalTime = finishTime - startTime;
+
+        grunt.log.writeln('\nFinished in ' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
+        done();
     }
 
     grunt.registerTask('behat', 'Parallel behat', function () {
