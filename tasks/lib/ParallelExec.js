@@ -3,13 +3,16 @@ var exec = require('child_process').exec,
     _ = require('underscore'),
     EventEmitter = require('events').EventEmitter;
 
-module.exports = function (maxTasks, execOptions) {
+/**
+ * Run some commands in parallel
+ * 
+ * @param {Number} maxTasks
+ * @param {Object} execOptions 
+ */
+function ParallelExec (maxTasks, execOptions) {
     var running = false,
         queue = [],
         runningTasks = 0;
-
-    // inherit from event emitter
-    EventEmitter.call(this);
 
     /**
      * Adds a task to the queue and starts the next task if there is space.
@@ -29,8 +32,10 @@ module.exports = function (maxTasks, execOptions) {
      */
     function startNextTask () {
         if (queue.length > 0) {
-            runningTasks++;
             var cmd = queue.shift();
+            
+            runningTasks++;
+            this.emit('startedTask', cmd);
             exec(cmd, execOptions, _.partial(taskDone, cmd));
         }
     }
@@ -40,10 +45,13 @@ module.exports = function (maxTasks, execOptions) {
      */
     function taskDone () {
         runningTasks--;
-        this.emit('taskComplete', arguments);
+        this.emit('finishedTask', arguments);
 
         if (queue.length > 0) {
             startNextTask();
+        }
+        else {
+            this.emit('finished', arguments);
         }
     }
 
@@ -56,8 +64,16 @@ module.exports = function (maxTasks, execOptions) {
         _.times(maxTasks - runningTasks, startNextTask);
     }
 
+    startNextTask = startNextTask.bind(this);
+    taskDone = taskDone.bind(this);
+
     this.start = start;
     this.addTask = addTask;
 
-    return this;
+    // inherit from event emitter
+    EventEmitter.call(this);
 }
+
+require('util').inherits(ParallelExec, EventEmitter);
+
+module.exports = ParallelExec;

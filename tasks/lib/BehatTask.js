@@ -2,7 +2,22 @@
 
 var _ = require('underscore');
 
-module.exports = function (options) {
+/**
+ * Run multiple behat feature files in parallel.
+ *
+ * Example usage: 
+ *
+ * var behat = new BehatTask({
+ *     files: ['feature1.feature', 'feature2.feature'],
+ *     log: console.log,
+ *     bin: 'behat',
+ *     flags: '--tags @wip',
+ *     executor: new ParallelExec(5)
+ * })
+ * 
+ * @param {Object} options
+ */
+function BehatTask (options) {
     var tasks = {},
         startTime;
 
@@ -82,6 +97,6 @@ module.exports = function (options) {
     }
 
     this.run = run;
-
-    return this;
 }
+
+module.exports = BehatTask;
