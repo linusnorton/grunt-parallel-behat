@@ -22,10 +22,19 @@ module.exports = function(grunt) {
         },
         src: ['test/**/*.js']
       },
-      coverage: {
+      testCoverage: {
+        options: {
+          reporter: 'spec',
+          require: 'coverage',
+          ui: 'tdd'
+        },
+        src: ['test/**/*.js']
+      },
+      coverageReport: {
         options: {
           reporter: 'html-cov',
-          quiet: true
+          quiet: true,
+          ui: 'tdd'
         },
         src: ['test/**/*.js'],
         dest: 'coverage.html'
@@ -47,6 +56,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
 
   grunt.registerTask('test', 'mochaTest:test');
+  grunt.registerTask('coverage', ['mochaTest:testCoverage', 'mochaTest:coverageReport']);
   grunt.registerTask('lint', 'jshint');
 
   // By default, lint and run all tests.

@@ -1,0 +1,3 @@
+require('blanket')({
+  pattern: '/tasks/'
+});
