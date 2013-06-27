@@ -1,10 +1,15 @@
 
-var exec = require('child_process').exec;
+var exec = require('child_process').exec,
+    _ = require('underscore'),
+    EventEmitter = require('events').EventEmitter;
 
 module.exports = function (maxTasks, execOptions) {
     var running = false,
         queue = [],
         runningTasks = 0;
+
+    // inherit from event emitter
+    EventEmitter.call(this);
 
     /**
      * Adds a task to the queue and starts the next task if there is space.
@@ -23,9 +28,11 @@ module.exports = function (maxTasks, execOptions) {
      * Shift the next task from the queue and start it up
      */
     function startNextTask () {
-        runningTasks++;
-        var cmd = queue.shift();
-        exec(cmd, options, _.partial(taskDone, cmd));
+        if (queue.length > 0) {
+            runningTasks++;
+            var cmd = queue.shift();
+            exec(cmd, execOptions, _.partial(taskDone, cmd));
+        }
     }
 
     /**
@@ -35,7 +42,7 @@ module.exports = function (maxTasks, execOptions) {
         runningTasks--;
         this.emit('taskComplete', arguments);
 
-        if (!isFinished()) {
+        if (queue.length > 0) {
             startNextTask();
         }
     }
@@ -49,18 +56,8 @@ module.exports = function (maxTasks, execOptions) {
         _.times(maxTasks - runningTasks, startNextTask);
     }
 
-    /**
-     * Returns true if the queue is empty
-     *
-     * @return {Boolean}
-     */
-    function isFinished() {
-        return queue.length === 0;
-    }
-
     this.start = start;
     this.addTask = addTask;
-    this.isFinished = isFinished;
 
     return this;
 }

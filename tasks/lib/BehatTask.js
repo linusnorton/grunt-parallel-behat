@@ -17,6 +17,7 @@ module.exports = function (options) {
 
         options.executor.on('startedTask', taskStarted);
         options.executor.on('finishedTask', taskFinished);
+        options.executor.on('finished', finish);
         options.executor.run();
     }
 
@@ -60,17 +61,13 @@ module.exports = function (options) {
             options.executor.addTask(task);
         }
         else if (err && err.code === 1) {
-            options.log('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);            
+            options.log('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
         }
         else if (err) {
             options.log('Error: ' + file + ' - ' + err + stdout);
         }
         else {
-            options.log('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);        
-        }
-
-        if (options.executor.isFinished()) {
-            finish();
+            options.log('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
         }
     }
 
@@ -81,6 +78,7 @@ module.exports = function (options) {
         var totalTime = new Date() - startTime;
 
         options.log('\nFinished in' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
+        options.done();
     }
 
     this.run = run;

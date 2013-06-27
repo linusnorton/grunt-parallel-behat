@@ -24,6 +24,7 @@ suite('Behat Test', function () {
 
         task = new BehatTask({
             executor: mockExecutor,
+            done: function () {},
             log: log,
             files: ['awesome.feature', 'brilliant.feature'],
             bin: 'behat',
@@ -46,15 +47,17 @@ suite('Behat Test', function () {
         mockExecutor.on = spy();
         task.run();
 
-        assert.equal(mockExecutor.on.callCount, 2);
+        assert.equal(mockExecutor.on.callCount, 3);
         assert.equal(mockExecutor.on.args[0][0], 'startedTask');
         assert.equal(mockExecutor.on.args[1][0], 'finishedTask');
+        assert.equal(mockExecutor.on.args[2][0], 'finished');
     });
 
     test('provides user feedback', function () {
         stub(mockExecutor, 'run', function () {
             mockExecutor.callbacks.startedTask.call(task, 'behat   awesome.feature');
             mockExecutor.callbacks.finishedTask.call(task, 'behat   awesome.feature', void 0, '3 scenarios (3 passed)\n\n5m15s\n');
+            mockExecutor.callbacks.finished();
         });
 
         mockExecutor.isFinished = stub().returns(true);
@@ -76,7 +79,7 @@ suite('Behat Test', function () {
         task.run();
 
         assert.equal(log.callCount, 2);
-        assert.equal(mockExecutor.addTask.callCount, 3);        
+        assert.equal(mockExecutor.addTask.callCount, 3);
         assert.equal(log.args[1][0], 'Timeout: awesome.feature - adding to the back of the queue.');
     });
 
