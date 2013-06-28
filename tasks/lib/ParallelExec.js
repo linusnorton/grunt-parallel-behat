@@ -5,9 +5,9 @@ var exec = require('child_process').exec,
 
 /**
  * Run some commands in parallel
- * 
+ *
  * @param {Number} maxTasks
- * @param {Object} execOptions 
+ * @param {Object} execOptions
  */
 function ParallelExec (maxTasks, execOptions) {
     var running = false,
@@ -33,7 +33,7 @@ function ParallelExec (maxTasks, execOptions) {
     function startNextTask () {
         if (queue.length > 0) {
             var cmd = queue.shift();
-            
+
             runningTasks++;
             this.emit('startedTask', cmd);
             exec(cmd, execOptions, _.partial(taskDone, cmd));
@@ -43,15 +43,15 @@ function ParallelExec (maxTasks, execOptions) {
     /**
      * Decrement the running tasks and start the next one
      */
-    function taskDone () {
+    function taskDone (err, stdout, stderr) {
         runningTasks--;
-        this.emit('finishedTask', arguments);
+        this.emit('finishedTask', err, stdout, stderr);
 
         if (queue.length > 0) {
             startNextTask();
         }
         else {
-            this.emit('finished', arguments);
+            this.emit('finished');
         }
     }
 
