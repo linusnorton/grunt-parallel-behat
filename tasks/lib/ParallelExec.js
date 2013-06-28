@@ -1,4 +1,3 @@
-
 var exec = require('child_process').exec,
     _ = require('underscore'),
     EventEmitter = require('events').EventEmitter;
@@ -50,7 +49,7 @@ function ParallelExec (maxTasks, execOptions) {
         if (queue.length > 0) {
             startNextTask();
         }
-        else {
+        else if (runningTasks === 0) {
             this.emit('finished');
         }
     }
