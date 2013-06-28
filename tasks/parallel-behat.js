@@ -17,8 +17,8 @@ var glob = require('glob'),
 
 /**
  * Grunt task for executing behat feature files in parallel
- * 
- * @param {Grunt} grunt 
+ *
+ * @param {Grunt} grunt
  */
 function GruntTask (grunt) {
     var options = _.defaults(grunt.config('behat'), defaults),
@@ -32,9 +32,10 @@ function GruntTask (grunt) {
             options.files = files;
             options.done = done;
             options.executor = executor;
+            options.log = grunt.log.writeln;
 
             behat = new BehatTask(options);
-            behat.start();
+            behat.run();
         });
     });
 

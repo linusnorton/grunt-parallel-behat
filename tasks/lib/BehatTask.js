@@ -5,7 +5,7 @@ var _ = require('underscore');
 /**
  * Run multiple behat feature files in parallel.
  *
- * Example usage: 
+ * Example usage:
  *
  * var behat = new BehatTask({
  *     files: ['feature1.feature', 'feature2.feature'],
@@ -14,7 +14,7 @@ var _ = require('underscore');
  *     flags: '--tags @wip',
  *     executor: new ParallelExec(5)
  * })
- * 
+ *
  * @param {Object} options
  */
 function BehatTask (options) {
@@ -33,7 +33,7 @@ function BehatTask (options) {
         options.executor.on('startedTask', taskStarted);
         options.executor.on('finishedTask', taskFinished);
         options.executor.on('finished', finish);
-        options.executor.run();
+        options.executor.start();
     }
 
     /**
@@ -43,7 +43,7 @@ function BehatTask (options) {
      */
     function addTask (file) {
         var configOpt = options.config ? '-c ' + options.config : '',
-            filePath = options.baseDir ? + options.baseDir + file : file,
+            filePath = options.baseDir ? options.baseDir + file : file,
             cmd = [options.bin, configOpt, options.flags, filePath].join(' ');
 
         tasks[cmd] = file;
@@ -56,7 +56,7 @@ function BehatTask (options) {
      * @param  {string} task
      */
     function taskStarted (task) {
-        options.log('Started: ' + tasks[task]);
+        options.log('Started: ' + task);
     }
 
     /**
@@ -69,7 +69,7 @@ function BehatTask (options) {
      */
     function taskFinished (task, err, stdout, stderr) {
         var file = tasks[task],
-            output = stdout.split('\n');
+            output = stdout ? stdout.split('\n') : [];
 
         if (err && err.code === 13) {
             options.log('Timeout: ' + file + ' - adding to the back of the queue.');

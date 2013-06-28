@@ -14,7 +14,7 @@ suite('Behat Test', function () {
         mockExecutor = {
             callbacks: {},
             addTask: spy(),
-            run: function () {},
+            start: function () {},
             on: function (event, callback) {
                 this.callbacks[event] = callback;
             }
@@ -34,13 +34,13 @@ suite('Behat Test', function () {
     });
 
     test('adds tasks and starts the executor', function () {
-        mockExecutor.run = spy();
+        mockExecutor.start = spy();
         task.run();
 
         assert.equal(mockExecutor.addTask.callCount, 2);
         assert.equal(mockExecutor.addTask.args[0][0], 'behat   awesome.feature');
         assert.equal(mockExecutor.addTask.args[1][0], 'behat   brilliant.feature');
-        assert.equal(mockExecutor.run.callCount, 1);
+        assert.equal(mockExecutor.start.callCount, 1);
     });
 
     test('registers listeners for tasks started and completed', function () {
@@ -54,7 +54,7 @@ suite('Behat Test', function () {
     });
 
     test('provides user feedback', function () {
-        stub(mockExecutor, 'run', function () {
+        stub(mockExecutor, 'start', function () {
             mockExecutor.callbacks.startedTask.call(task, 'behat   awesome.feature');
             mockExecutor.callbacks.finishedTask.call(task, 'behat   awesome.feature', void 0, '3 scenarios (3 passed)\n\n5m15s\n');
             mockExecutor.callbacks.finished();
@@ -65,13 +65,13 @@ suite('Behat Test', function () {
 
         assert.equal(log.callCount, 4);
         assert.equal(log.args[0][0], 'Found 2 feature file(s). Running 10000 at a time.');
-        assert.equal(log.args[1][0], 'Started: awesome.feature');
+        assert.equal(log.args[1][0], 'Started: behat   awesome.feature');
         assert.equal(log.args[2][0], 'Completed: awesome.feature - 3 scenarios (3 passed) in 5m15s');
         assert(log.args[3][0].indexOf('Finished in') > -1);
     });
 
     test('handles timeouts', function () {
-        stub(mockExecutor, 'run', function () {
+        stub(mockExecutor, 'start', function () {
             mockExecutor.callbacks.finishedTask.call(task, 'behat   awesome.feature', {code: 13}, '');
         });
 
@@ -84,7 +84,7 @@ suite('Behat Test', function () {
     });
 
     test('handles failed tests', function () {
-        stub(mockExecutor, 'run', function () {
+        stub(mockExecutor, 'start', function () {
             mockExecutor.callbacks.finishedTask.call(task, 'behat   awesome.feature', {code: 1}, '3 scenarios (1 passed, 2 failed)\n\n5m15s\n');
         });
 
@@ -96,7 +96,7 @@ suite('Behat Test', function () {
     });
 
     test('handles unknown errors', function () {
-        stub(mockExecutor, 'run', function () {
+        stub(mockExecutor, 'start', function () {
             mockExecutor.callbacks.finishedTask.call(task, 'behat   awesome.feature', {code: 1000000}, 'ZOMG! I\'m dead!!');
         });
 
