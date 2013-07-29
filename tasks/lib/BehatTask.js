@@ -84,6 +84,12 @@ function BehatTask (options) {
         else {
             options.log('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
         }
+
+        if (options.debug) {
+            options.log('\nerr: \n' + err);
+            options.log('\nstderr: \n' + stderr);
+            options.log('\nstdout: \n' + stdout);
+        }
     }
 
     /**

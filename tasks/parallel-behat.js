@@ -12,7 +12,8 @@ var glob = require('glob'),
         config: './behat.yml',
         flags: '',
         maxProcesses: 10000,
-        baseDir: './'
+        baseDir: './',
+        debug: false
     };
 
 /**
