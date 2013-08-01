@@ -13,7 +13,8 @@ var glob = require('glob'),
         flags: '',
         maxProcesses: 10000,
         baseDir: './',
-        debug: false
+        debug: false,
+        numRetries: 0
     };
 
 /**

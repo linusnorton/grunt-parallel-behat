@@ -107,4 +107,29 @@ suite('Behat Test', function () {
         assert.equal(log.args[1][0], 'Error: awesome.feature - [object Object]ZOMG! I\'m dead!!');
     });
 
+    test('adds tasks back to the queue if numRetries is specified', function () {
+        stub(mockExecutor, 'start', function () {
+            mockExecutor.callbacks.finishedTask.call(task, 'behat   awesome.feature', {code: 1}, 'Test failed');
+        });
+
+        mockExecutor.isFinished = stub().returns(false);
+
+        task = new BehatTask({
+            executor: mockExecutor,
+            done: function () {},
+            log: log,
+            files: ['awesome.feature', 'brilliant.feature'],
+            bin: 'behat',
+            flags: '',
+            maxProcesses: 10000,
+            numRetries: 2
+        });
+        task.run();
+
+        assert.equal(log.args[1][0], 'Failed: awesome.feature - undefined in undefined');
+        assert.equal(log.args[2][0], 'Retrying: awesome.feature 1 of 2 time(s)');
+        assert.equal(log.callCount, 3);
+        assert.equal(mockExecutor.addTask.callCount, 3);
+    });
+
 });

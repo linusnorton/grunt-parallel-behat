@@ -12,13 +12,15 @@ var _ = require('underscore');
  *     log: console.log,
  *     bin: 'behat',
  *     flags: '--tags @wip',
- *     executor: new ParallelExec(5)
+ *     executor: new ParallelExec(5),
+ *     numRetries: 0
  * })
  *
  * @param {Object} options
  */
 function BehatTask (options) {
     var tasks = {},
+        failedTasks = {},
         startTime;
 
     /**
@@ -77,6 +79,13 @@ function BehatTask (options) {
         }
         else if (err && err.code === 1) {
             options.log('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+
+            failedTasks[task] = _.has(failedTasks, task) ? failedTasks[task] + 1 : 0;
+
+            if (failedTasks[task] < options.numRetries) {
+                options.log('Retrying: ' + file + ' ' + (failedTasks[task] + 1) + ' of ' + options.numRetries + ' time(s)');
+                options.executor.addTask(task);
+            }
         }
         else if (err) {
             options.log('Error: ' + file + ' - ' + err + stdout);
@@ -86,9 +95,9 @@ function BehatTask (options) {
         }
 
         if (options.debug) {
-            options.log('\nerr: \n' + err);
-            options.log('\nstderr: \n' + stderr);
-            options.log('\nstdout: \n' + stdout);
+            if (err) options.log('\nerr: \n' + err);
+            if (stderr) options.log('\nstderr: \n' + stderr);
+            if (stdout) options.log('\nstdout: \n' + stdout);
         }
     }
 
