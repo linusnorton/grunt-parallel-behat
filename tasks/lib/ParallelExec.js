@@ -14,6 +14,15 @@ function ParallelExec (maxTasks, execOptions) {
         runningTasks = 0;
 
     /**
+     * True if there are items on the queue and we have space to run a task
+     *
+     * @return {boolean}
+     */
+    function canStartTask () {
+        return queue.length > 0 && running && runningTasks < maxTasks;
+    }
+
+    /**
      * Adds a task to the queue and starts the next task if there is space.
      *
      * @param {string} cmd
@@ -21,7 +30,7 @@ function ParallelExec (maxTasks, execOptions) {
     function addTask (cmd) {
         queue.push(cmd);
 
-        if (running && runningTasks < maxTasks) {
+        if (canStartTask()) {
             startNextTask();
         }
     }
@@ -30,7 +39,7 @@ function ParallelExec (maxTasks, execOptions) {
      * Shift the next task from the queue and start it up
      */
     function startNextTask () {
-        if (queue.length > 0) {
+        if (canStartTask()) {
             var cmd = queue.shift();
 
             runningTasks++;
@@ -42,11 +51,11 @@ function ParallelExec (maxTasks, execOptions) {
     /**
      * Decrement the running tasks and start the next one
      */
-    function taskDone (err, stdout, stderr) {
+    function taskDone (cmd, err, stdout, stderr) {
         runningTasks--;
-        this.emit('finishedTask', err, stdout, stderr);
+        this.emit('finishedTask', cmd, err, stdout, stderr);
 
-        if (queue.length > 0) {
+        if (canStartTask()) {
             startNextTask();
         }
         else if (runningTasks === 0) {
