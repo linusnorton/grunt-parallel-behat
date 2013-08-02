@@ -79,25 +79,37 @@ function BehatTask (options) {
         }
         else if (err && err.code === 1) {
             options.log('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
-
-            failedTasks[task] = _.has(failedTasks, task) ? failedTasks[task] + 1 : 0;
-
-            if (failedTasks[task] < options.numRetries) {
-                options.log('Retrying: ' + file + ' ' + (failedTasks[task] + 1) + ' of ' + options.numRetries + ' time(s)');
-                options.executor.addTask(task);
-            }
+            taskPendingOrFailed(task);
         }
         else if (err) {
             options.log('Error: ' + file + ' - ' + err + stdout);
         }
         else {
             options.log('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+
+            if (output[output.length - 4].indexOf('pending') > -1) {
+                taskPendingOrFailed(task);
+            }
         }
 
         if (options.debug) {
             if (err) options.log('\nerr: \n' + err);
             if (stderr) options.log('\nstderr: \n' + stderr);
             if (stdout) options.log('\nstdout: \n' + stdout);
+        }
+    }
+
+    /**
+     * Add the given task to the fail list and retry if options.numRetries is specified
+     *
+     * @param  {string} task
+     */
+    function taskPendingOrFailed (task) {
+        failedTasks[task] = _.has(failedTasks, task) ? failedTasks[task] + 1 : 0;
+
+        if (failedTasks[task] < options.numRetries) {
+            options.log('Retrying: ' + tasks[task] + ' ' + (failedTasks[task] + 1) + ' of ' + options.numRetries + ' time(s)');
+            options.executor.addTask(task);
         }
     }
 
