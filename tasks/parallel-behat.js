@@ -14,7 +14,8 @@ var glob = require('glob'),
         maxProcesses: 10000,
         baseDir: './',
         debug: false,
-        numRetries: 0
+        numRetries: 0,
+        timeout: 600000
     };
 
 /**
@@ -24,7 +25,7 @@ var glob = require('glob'),
  */
 function GruntTask (grunt) {
     var options = _.defaults(grunt.config('behat'), defaults),
-        executor = new ParallelExec(options.maxProcesses, {cwd: options.cwd}),
+        executor = new ParallelExec(options.maxProcesses, {cwd: options.cwd, timeout: options.timeout}),
         behat;
 
     grunt.registerTask('behat', 'Parallel behat', function () {
