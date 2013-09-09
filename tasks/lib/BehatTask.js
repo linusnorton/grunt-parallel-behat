@@ -1,6 +1,7 @@
 'use strict';
 
-var _ = require('underscore');
+var _ = require('underscore'),
+    inspect = require('util').inspect;
 
 /**
  * Run multiple behat feature files in parallel.
@@ -93,7 +94,7 @@ function BehatTask (options) {
         }
 
         if (options.debug) {
-            if (err) options.log('\nerr: \n' + err);
+            if (err) options.log('\nerr: \n' + inspect(err));
             if (stderr) options.log('\nstderr: \n' + stderr);
             if (stdout) options.log('\nstdout: \n' + stdout);
         }
