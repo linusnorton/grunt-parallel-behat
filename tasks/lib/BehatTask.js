@@ -118,7 +118,7 @@ function BehatTask (options) {
      * Output the final run time and emit the finished event
      */
     function finish () {
-        var totalTime = (new Date() - startTime) / 1000;
+        var totalTime = Math.floor((new Date() - startTime) / 1000);
 
         options.log('\nFinished in ' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
         options.done();
