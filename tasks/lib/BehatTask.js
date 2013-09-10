@@ -74,7 +74,7 @@ function BehatTask (options) {
         var file = tasks[task],
             output = stdout ? stdout.split('\n') : [];
 
-        if (err && err.code === 13) {
+        if (err && (err.code === 13 || err.killed)) {
             options.log('Timeout: ' + file + ' - adding to the back of the queue.');
             options.executor.addTask(task);
         }
@@ -118,9 +118,9 @@ function BehatTask (options) {
      * Output the final run time and emit the finished event
      */
     function finish () {
-        var totalTime = new Date() - startTime;
+        var totalTime = (new Date() - startTime) / 1000;
 
-        options.log('\nFinished in' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
+        options.log('\nFinished in ' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
         options.done();
     }
 
