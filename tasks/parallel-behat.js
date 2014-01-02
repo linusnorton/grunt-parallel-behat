@@ -24,7 +24,7 @@ var glob = require('glob'),
  * @param {Grunt} grunt
  */
 function GruntTask (grunt) {
-    var options = _.defaults(grunt.config('behat'), defaults),
+    var options = _.defaults(grunt.config('behat') || {}, defaults),
         executor = new ParallelExec(options.maxProcesses, {cwd: options.cwd, timeout: options.timeout}),
         behat;
 
