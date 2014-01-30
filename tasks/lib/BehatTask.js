@@ -29,7 +29,7 @@ function BehatTask (options) {
      */
     function run() {
         startTime = +new Date();
-        options.log('Found ' + options.files.length + ' feature file(s). Running ' + options.maxProcesses + ' at a time.');
+        options.log.subhead('Found ' + options.files.length + ' feature file(s). Running ' + options.maxProcesses + ' at a time.');
 
         _.each(options.files, addTask);
 
@@ -59,7 +59,7 @@ function BehatTask (options) {
      * @param  {string} task
      */
     function taskStarted (task) {
-        options.log('Started: ' + task);
+        options.log.writeln('Started: ' + task);
     }
 
     /**
@@ -75,18 +75,18 @@ function BehatTask (options) {
             output = stdout ? stdout.split('\n') : [];
 
         if (err && (err.code === 13 || err.killed)) {
-            options.log('Timeout: ' + file + ' - adding to the back of the queue.');
+            options.log.writeln('Timeout: ' + file + ' - adding to the back of the queue.');
             options.executor.addTask(task);
         }
         else if (err && err.code === 1) {
-            options.log('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+            options.log.error('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2] + '\n' + stdout);
             taskPendingOrFailed(task);
         }
         else if (err) {
-            options.log('Error: ' + file + ' - ' + err + stdout);
+            options.log.error('Error: ' + file + ' - ' + err + stdout);
         }
         else {
-            options.log('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+            options.log.ok('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
 
             if (output[output.length - 4].indexOf('pending') > -1) {
                 taskPendingOrFailed(task);
@@ -94,9 +94,9 @@ function BehatTask (options) {
         }
 
         if (options.debug) {
-            if (err) options.log('\nerr: \n' + inspect(err));
-            if (stderr) options.log('\nstderr: \n' + stderr);
-            if (stdout) options.log('\nstdout: \n' + stdout);
+            if (err) options.log.writeln('\nerr: \n' + inspect(err));
+            if (stderr) options.log.writeln('\nstderr: \n' + stderr);
+            if (stdout) options.log.writeln('\nstdout: \n' + stdout);
         }
     }
 
@@ -109,8 +109,11 @@ function BehatTask (options) {
         failedTasks[task] = _.has(failedTasks, task) ? failedTasks[task] + 1 : 0;
 
         if (failedTasks[task] < options.numRetries) {
-            options.log('Retrying: ' + tasks[task] + ' ' + (failedTasks[task] + 1) + ' of ' + options.numRetries + ' time(s)');
+            options.log.writeln('Retrying: ' + tasks[task] + ' ' + (failedTasks[task] + 1) + ' of ' + options.numRetries + ' time(s)');
             options.executor.addTask(task);
+        }
+        else {
+            options.fail.warn('Scenario failed');
         }
     }
 
@@ -120,7 +123,7 @@ function BehatTask (options) {
     function finish () {
         var totalTime = Math.floor((new Date() - startTime) / 1000);
 
-        options.log('\nFinished in ' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
+        options.log.writeln('\nFinished in ' + Math.floor(totalTime / 60) + 'm' + totalTime % 60 + 's');
         options.done();
     }
 
