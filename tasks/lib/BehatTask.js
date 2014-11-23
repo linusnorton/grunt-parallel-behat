@@ -79,7 +79,7 @@ function BehatTask (options) {
             options.executor.addTask(task);
         }
         else if (err && err.code === 1) {
-            options.log.error('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2] + '\n' + stdout);
+            options.log.error('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
             taskPendingOrFailed(task);
         }
         else if (err) {
