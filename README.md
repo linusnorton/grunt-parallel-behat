@@ -42,6 +42,9 @@ grunt.initConfig({
         maxProcesses: 5,
         bin: './bin/behat',
         flags: '--tags @wip'
+        env: {
+            MINK_EXTENSION_PARAMS: 'base_url=http://localhost:8080'
+        }
     }
 });
 ```

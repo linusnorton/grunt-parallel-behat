@@ -15,7 +15,8 @@ var glob = require('glob'),
         baseDir: './',
         debug: false,
         numRetries: 0,
-        timeout: 600000
+        timeout: 600000,
+        env: {}
     };
 
 /**
@@ -28,7 +29,7 @@ function GruntTask (grunt) {
     grunt.registerMultiTask('behat', 'Parallel behat', function () {
         var done = this.async(),
             options = this.options(defaults),
-            executor = new ParallelExec(options.maxProcesses, {cwd: options.cwd, timeout: options.timeout}),
+            executor = new ParallelExec(options.maxProcesses, {cwd: options.cwd, timeout: options.timeout, env: options.env}),
             behat;
 
         options.files = this.filesSrc;
