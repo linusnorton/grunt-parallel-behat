@@ -25,7 +25,15 @@ suite('Behat Test', function () {
         task = new BehatTask({
             executor: mockExecutor,
             done: function () {},
-            log: log,
+            log: {
+                subhead: log,
+                writeln: log,
+                error: log,
+                ok: log
+            },
+            fail: {
+                warn: log
+            },
             files: ['awesome.feature', 'brilliant.feature'],
             bin: 'behat',
             flags: '',
@@ -91,7 +99,7 @@ suite('Behat Test', function () {
         mockExecutor.isFinished = stub().returns(false);
         task.run();
 
-        assert.equal(log.callCount, 2);
+        assert.equal(log.callCount, 3);
         assert.equal(log.args[1][0], 'Failed: awesome.feature - 3 scenarios (1 passed, 2 failed) in 5m15s');
     });
 
@@ -117,7 +125,15 @@ suite('Behat Test', function () {
         task = new BehatTask({
             executor: mockExecutor,
             done: function () {},
-            log: log,
+            log: {
+                subhead: log,
+                writeln: log,
+                error: log,
+                ok: log
+            },
+            fail: {
+                warn: log
+            },
             files: ['awesome.feature', 'brilliant.feature'],
             bin: 'behat',
             flags: '',
@@ -140,7 +156,15 @@ suite('Behat Test', function () {
         task = new BehatTask({
             executor: mockExecutor,
             done: function () {},
-            log: log,
+            log: {
+                subhead: log,
+                writeln: log,
+                error: log,
+                ok: log
+            },
+            fail: {
+                warn: log
+            },
             files: ['awesome.feature', 'brilliant.feature'],
             bin: 'behat',
             flags: '',
