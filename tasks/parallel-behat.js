@@ -16,7 +16,7 @@ var glob = require('glob'),
         debug: false,
         numRetries: 0,
         timeout: 600000,
-        env: {}
+        env: null
     };
 
 /**
