@@ -74,6 +74,12 @@ function BehatTask (options) {
         var file = tasks[task],
             output = stdout ? stdout.split('\n') : [];
 
+        if (options.debug) {
+            if (err) options.log.writeln('\nerr: \n' + inspect(err));
+            if (stderr) options.log.writeln('\nstderr: \n' + stderr);
+            if (stdout) options.log.writeln('\nstdout: \n' + stdout);
+        }
+
         if (err && (err.code === 13 || err.killed)) {
             options.log.writeln('Timeout: ' + file + ' - adding to the back of the queue.');
             options.executor.addTask(task);
@@ -91,12 +97,6 @@ function BehatTask (options) {
             if (output[output.length - 4].indexOf('pending') > -1) {
                 taskPendingOrFailed(task);
             }
-        }
-
-        if (options.debug) {
-            if (err) options.log.writeln('\nerr: \n' + inspect(err));
-            if (stderr) options.log.writeln('\nstderr: \n' + stderr);
-            if (stdout) options.log.writeln('\nstdout: \n' + stdout);
         }
     }
 
