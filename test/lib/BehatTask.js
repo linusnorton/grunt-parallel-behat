@@ -111,7 +111,7 @@ suite('Behat Test', function () {
         mockExecutor.isFinished = stub().returns(false);
         task.run();
 
-        assert.equal(log.callCount, 2);
+        assert.equal(log.callCount, 3);
         assert.equal(log.args[1][0], 'Error: awesome.feature - [object Object]ZOMG! I\'m dead!!');
     });
 
