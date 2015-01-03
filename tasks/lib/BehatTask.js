@@ -90,6 +90,7 @@ function BehatTask (options) {
         }
         else if (err) {
             options.log.error('Error: ' + file + ' - ' + err + stdout);
+            options.fail.warn('Behat command failed');
         }
         else {
             options.log.ok('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
