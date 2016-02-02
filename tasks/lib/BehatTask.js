@@ -52,7 +52,8 @@ function BehatTask (options) {
             junitOut = options.junit ? '-f junit --out ' + options.junit.output_folder : '',
             cmd = [options.bin, configOpt, filePath, options.flags, junitOut].join(' ');
 
-
+        // Consistent spaces and trimming space off end
+        cmd = cmd.replace(/\s+/g, ' ').trim();
         tasks[cmd] = file;
         options.executor.addTask(cmd);
     }
@@ -113,7 +114,7 @@ function BehatTask (options) {
             }
 
         } else {
-            output = stdout ? stdout.split('\n') : [];
+            var output = stdout ? stdout.split('\n') : [];
 
             if (options.debug) {
                 if (err) options.log.writeln('\nerr: \n' + inspect(err));
