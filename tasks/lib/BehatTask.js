@@ -1,7 +1,9 @@
 'use strict';
 
 var _ = require('underscore'),
-    inspect = require('util').inspect;
+    inspect = require('util').inspect,
+    parseString = require('xml2js').parseString,
+    fs = require('fs');
 
 /**
  * Run multiple behat feature files in parallel.
@@ -47,8 +49,11 @@ function BehatTask (options) {
     function addTask (file) {
         var configOpt = options.config ? '-c ' + options.config : '',
             filePath = options.baseDir ? options.baseDir + file : file,
-            cmd = [options.bin, configOpt, options.flags, filePath].join(' ');
+            junitOut = options.junit ? '-f junit --out ' + options.junit.output_folder : '',
+            cmd = [options.bin, configOpt, filePath, options.flags, junitOut].join(' ');
 
+        // Consistent spaces and trimming space off end
+        cmd = cmd.replace(/\s+/g, ' ').trim();
         tasks[cmd] = file;
         options.executor.addTask(cmd);
     }
@@ -71,32 +76,69 @@ function BehatTask (options) {
      * @param {string} stderr
      */
     function taskFinished (task, err, stdout, stderr) {
-        var file = tasks[task],
-            output = stdout ? stdout.split('\n') : [];
+        var file = tasks[task];
 
-        if (options.debug) {
-            if (err) options.log.writeln('\nerr: \n' + inspect(err));
-            if (stderr) options.log.writeln('\nstderr: \n' + stderr);
-            if (stdout) options.log.writeln('\nstdout: \n' + stdout);
-        }
+        // Capture junit output
+        if (options.junit) {
+            var file_path = file.split('/');
+            var feature = file_path[file_path.length - 1].replace('.feature', '');
+            file_path.splice(-1, 1);
+            for (var i = 0; i < file_path.length; i++) {
+                if (file_path[i] == 'features') {
+                    file_path.splice(0, i + 1);
+                }
+            }
+            var testfile = fs.readFileSync(options.junit.output_folder + 'TEST-' + file_path.join('-') + '-' + feature + '.xml', 'utf8');
+            if (testfile) {
+                parseString(testfile, function (err, result) {
 
-        if (err && (err.code === 13 || err.killed)) {
-            options.log.writeln('Timeout: ' + file + ' - adding to the back of the queue.');
-            options.executor.addTask(task);
-        }
-        else if (err && err.code === 1) {
-            options.log.error('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
-            taskPendingOrFailed(task);
-        }
-        else if (err) {
-            options.log.error('Error: ' + file + ' - ' + err + stdout);
-            options.fail.warn('Behat command failed');
-        }
-        else {
-            options.log.ok('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+                    if (err) {
+                        options.log.error('Failed: to read JUnit XML file');
+                        taskPendingOrFailed(task);
+                    }
+                    else if (result.testsuite.$.errors >= 1 || result.testsuite.$.failures >= 1) {
+                        for (var i = 0; i < result.testsuite.testcase.length; i++) {
+                            if (result.testsuite.testcase[i].failure) {
+                                options.log.error('Error: ' + file + ' - ' + result.testsuite.testcase[i].failure["0"].$.message);
+                                taskPendingOrFailed(task);
+                            }
+                        }
+                    }
+                    else {
+                        options.log.ok('Completed: ' + file + ' - ' + result.testsuite.$.name  + ' in ' + result.testsuite.$.time + " seconds");
 
-            if (output[output.length - 4].indexOf('pending') > -1) {
+                    }
+                });
+            } else {
+                options.log.error('Failed: to read JUnit XML file');
+            }
+
+        } else {
+            var output = stdout ? stdout.split('\n') : [];
+
+            if (options.debug) {
+                if (err) options.log.writeln('\nerr: \n' + inspect(err));
+                if (stderr) options.log.writeln('\nstderr: \n' + stderr);
+                if (stdout) options.log.writeln('\nstdout: \n' + stdout);
+            }
+
+            if (err && (err.code === 13 || err.killed)) {
+                options.log.writeln('Timeout: ' + file + ' - adding to the back of the queue.');
+                options.executor.addTask(task);
+            }
+            else if (err && err.code === 1) {
+                options.log.error('Failed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
                 taskPendingOrFailed(task);
+            }
+            else if (err) {
+                options.log.error('Error: ' + file + ' - ' + err + stdout);
+            }
+            else {
+                options.log.ok('Completed: ' + file + ' - ' + output[output.length - 4] + ' in ' + output[output.length - 2]);
+
+                if (output[output.length - 4].indexOf('pending') > -1) {
+                    taskPendingOrFailed(task);
+                }
             }
         }
     }

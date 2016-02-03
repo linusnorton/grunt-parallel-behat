@@ -43,6 +43,10 @@ grunt.initConfig({
             maxProcesses: 5,
             bin: './bin/behat',
             flags: '--tags @wip',
+            // Optional for junit formatted output 
+            junit: {
+                output_folder: 'tests/test_results/'
+            }
             env: {
                 MINK_EXTENSION_PARAMS: 'base_url=http://localhost:8080'
             }

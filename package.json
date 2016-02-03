@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "underscore": "~1.4.x",
-    "glob": "~3.2.x"
+    "glob": "~3.2.x",
+    "xml2js": "0.4.15"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.2.0",
