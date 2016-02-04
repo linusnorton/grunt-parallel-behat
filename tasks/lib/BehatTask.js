@@ -31,9 +31,9 @@ function BehatTask (options) {
      */
     function run() {
         startTime = +new Date();
-        options.log.subhead('Found ' + options.files.length + ' feature file(s). Running ' + options.maxProcesses + ' at a time.');
 
         _.each(options.files, addTask);
+        options.log.subhead('Running ' + options.maxProcesses + ' at a time.');
 
         options.executor.on('startedTask', taskStarted);
         options.executor.on('finishedTask', taskFinished);
@@ -47,15 +47,17 @@ function BehatTask (options) {
      * @param {String} file
      */
     function addTask (file) {
-        var configOpt = options.config ? '-c ' + options.config : '',
-            filePath = options.baseDir ? options.baseDir + file : file,
-            junitOut = options.junit ? '-f junit --out ' + options.junit.output_folder : '',
-            cmd = [options.bin, configOpt, filePath, options.flags, junitOut].join(' ');
+        if (fs.lstatSync(file).isFile() && file.indexOf('.feature') > -1) {
+            var configOpt = options.config ? '-c ' + options.config : '',
+                filePath = options.baseDir ? options.baseDir + file : file,
+                junitOut = options.junit ? '-f junit --out ' + options.junit.output_folder : '',
+                cmd = [options.bin, configOpt, filePath, options.flags, junitOut].join(' ');
 
-        // Consistent spaces and trimming space off end
-        cmd = cmd.replace(/\s+/g, ' ').trim();
-        tasks[cmd] = file;
-        options.executor.addTask(cmd);
+            // Consistent spaces and trimming space off end
+            cmd = cmd.replace(/\s+/g, ' ').trim();
+            tasks[cmd] = file;
+            options.executor.addTask(cmd);
+        }
     }
 
     /**
@@ -99,7 +101,12 @@ function BehatTask (options) {
                     else if (result.testsuite.$.errors >= 1 || result.testsuite.$.failures >= 1) {
                         for (var i = 0; i < result.testsuite.testcase.length; i++) {
                             if (result.testsuite.testcase[i].failure) {
-                                options.log.error('Error: ' + file + ' - ' + result.testsuite.testcase[i].failure["0"].$.message);
+                                // Capture normal message or runtime error as a fallback
+                                if (result.testsuite.testcase[i].failure["0"].$.message) {
+                                    options.log.error('Error: ' + file + ' - ' + result.testsuite.testcase[i].failure["0"].$.message);
+                                } else {
+                                    options.log.error('Error: ' + file + ' - ' + result.testsuite.testcase[i].failure["0"]._);
+                                }
                                 taskPendingOrFailed(task);
                             }
                         }
