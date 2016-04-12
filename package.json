@@ -22,7 +22,7 @@
   ],
   "main": "Gruntfile.js",
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 0.10.0"
   },
   "scripts": {
     "test": "grunt test"
@@ -41,7 +41,7 @@
     "blanket": "1.1.x"
   },
   "peerDependencies": {
-    "grunt": ">=1.0.0"
+    "grunt": "~0.4.0"
   },
   "keywords": [
     "gruntplugin"
