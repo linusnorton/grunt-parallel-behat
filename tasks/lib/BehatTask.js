@@ -90,7 +90,7 @@ function BehatTask (options) {
                     file_path.splice(0, i + 1);
                 }
             }
-            var testfile = fs.readFileSync(options.junit.output_folder + 'TEST-' + file_path.join('-') + '-' + feature + '.xml', 'utf8');
+            var testfile = fs.readFileSync(options.junit.output_folder + feature + '.xml', 'utf8');
             if (testfile) {
                 parseString(testfile, function (err, result) {
 
@@ -98,21 +98,19 @@ function BehatTask (options) {
                         options.log.error('Failed: to read JUnit XML file');
                         taskPendingOrFailed(task);
                     }
-                    else if (result.testsuite.$.errors >= 1 || result.testsuite.$.failures >= 1) {
-                        for (var i = 0; i < result.testsuite.testcase.length; i++) {
-                            if (result.testsuite.testcase[i].failure) {
-                                // Capture normal message or runtime error as a fallback
-                                if (result.testsuite.testcase[i].failure["0"].$.message) {
-                                    options.log.error('Error: ' + file + ' - ' + result.testsuite.testcase[i].failure["0"].$.message);
-                                } else {
-                                    options.log.error('Error: ' + file + ' - ' + result.testsuite.testcase[i].failure["0"]._);
-                                }
-                                taskPendingOrFailed(task);
+                    else if ((result.testsuites.testsuite["0"].$.errors && result.testsuites.testsuite["0"].$.errors >= 1) || (result.testsuites.testsuite["0"].$.failures && result.testsuites.testsuite["0"].$.failures >= 1)) {
+                        for (var i = 0; i < result.testsuites.testsuite.length; i++) {
+                            if (result.testsuites.testsuite[i].$.failures) {
+                                options.log.error('Error: ' + file + ' - ' + result.testsuites.testsuite[i].$.failures + ' total errors');
+                            } else {
+                                options.log.error('Error: ' + file);
                             }
+                            // Capture normal message or runtime error as a fallback
+                            taskPendingOrFailed(task);
                         }
                     }
                     else {
-                        options.log.ok('Completed: ' + file + ' - ' + result.testsuite.$.name  + ' in ' + result.testsuite.$.time + " seconds");
+                        options.log.ok('Completed: ' + file + ' - ' + result.testsuites.$.name);
 
                     }
                 });
