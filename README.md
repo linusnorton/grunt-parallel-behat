@@ -41,9 +41,11 @@ grunt.initConfig({
         options: {
             config: './behat/behat.yml',
             maxProcesses: 5,
+            // Optional for parallel test execution with headless browsers
+            ports: [8124, 8125, 8126, 8127, 8128],
             bin: './bin/behat',
             flags: '--tags @wip',
-            // Optional for junit formatted output 
+            // Optional for junit formatted output
             junit: {
                 output_folder: 'tests/test_results/'
             }

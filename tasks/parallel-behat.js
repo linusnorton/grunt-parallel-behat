@@ -32,8 +32,14 @@ function GruntTask (grunt) {
         if (this.filesSrc.length > 0) {
             var done = this.async(),
                 options = this.options(defaults),
-                executor = new ParallelExec(options.maxProcesses, {cwd: options.cwd, timeout: options.timeout, env: options.env}),
+                execOptions = {cwd: options.cwd, timeout: options.timeout, env: options.env},
+                executor,
                 behat;
+
+            if (typeof options.ports != 'undefined') {
+              execOptions.ports = options.ports;
+            }
+            executor = new ParallelExec(options.maxProcesses, execOptions);
 
             options.files = this.filesSrc;
             options.done = done;
