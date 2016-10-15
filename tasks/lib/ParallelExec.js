@@ -21,7 +21,7 @@ function ParallelExec (maxTasks, execOptions) {
      */
     function canStartTask () {
         var usedPorts_length = Object.keys(usedPorts).length;
-        return queue.length > 0 && running && runningTasks < maxTasks && usedPorts_length < maxTasks && (typeof execOptions.ports == 'undefined' || usedPorts_length < execOptions.ports.length);
+        return queue.length > 0 && running && runningTasks < maxTasks && usedPorts_length < maxTasks && (typeof execOptions == 'undefined' || typeof execOptions.ports == 'undefined' || usedPorts_length < execOptions.ports.length);
     }
 
     /**
@@ -47,10 +47,7 @@ function ParallelExec (maxTasks, execOptions) {
             runningTasks++;
             this.emit('startedTask', cmd);
 
-            // Retrieve the behat parameters.
-            var behat_params = JSON.parse(execOptions.env['BEHAT_PARAMS']);
-
-            if (typeof execOptions.ports != 'undefined') {
+            if (typeof execOptions != 'undefined' && typeof execOptions.ports != 'undefined' && typeof execOptions.env != 'undefined') {
               // Multiple ports have been specified in Gruntconfig.json. We
               // will extend the behat environment variable to specify the port
               // to use for this run.
@@ -65,6 +62,7 @@ function ParallelExec (maxTasks, execOptions) {
 
               // Now add the available port to the behat parameters, assuming
               // that zombiejs is used.
+              var behat_params = JSON.parse(execOptions.env['BEHAT_PARAMS']);
               behat_params.extensions['Behat\\MinkExtension'].zombie.port = port;
               execOptions.env['BEHAT_PARAMS'] = JSON.stringify(behat_params);
               usedPorts[cmd] = port;
