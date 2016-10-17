@@ -11,7 +11,8 @@ var exec = require('child_process').exec,
 function ParallelExec (maxTasks, execOptions) {
     var running = false,
         queue = [],
-        runningTasks = 0;
+        runningTasks = 0,
+        usedPorts = {};
 
     /**
      * True if there are items on the queue and we have space to run a task
@@ -19,7 +20,8 @@ function ParallelExec (maxTasks, execOptions) {
      * @return {boolean}
      */
     function canStartTask () {
-        return queue.length > 0 && running && runningTasks < maxTasks;
+        var usedPorts_length = Object.keys(usedPorts).length;
+        return queue.length > 0 && running && runningTasks < maxTasks && usedPorts_length < maxTasks && (typeof execOptions == 'undefined' || typeof execOptions.ports == 'undefined' || usedPorts_length < execOptions.ports.length);
     }
 
     /**
@@ -44,6 +46,28 @@ function ParallelExec (maxTasks, execOptions) {
 
             runningTasks++;
             this.emit('startedTask', cmd);
+
+            if (typeof execOptions != 'undefined' && typeof execOptions.ports != 'undefined' && typeof execOptions.env != 'undefined') {
+              // Multiple ports have been specified in Gruntconfig.json. We
+              // will extend the behat environment variable to specify the port
+              // to use for this run.
+
+              var getPort = function (a, b) {
+                var availablePorts = a.filter(function (port) {
+                  return b.indexOf(port) == -1;
+                });
+                return availablePorts[0];
+              };
+              var port = getPort(execOptions.ports, Object.keys(usedPorts).map(function (key) { return usedPorts[key]; }));
+
+              // Now add the available port to the behat parameters, assuming
+              // that zombiejs is used.
+              var behat_params = JSON.parse(execOptions.env['BEHAT_PARAMS']);
+              behat_params.extensions['Behat\\MinkExtension'].zombie.port = port;
+              execOptions.env['BEHAT_PARAMS'] = JSON.stringify(behat_params);
+              usedPorts[cmd] = port;
+            }
+
             exec(cmd, execOptions, _.partial(taskDone, cmd));
         }
     }
@@ -53,6 +77,9 @@ function ParallelExec (maxTasks, execOptions) {
      */
     function taskDone (cmd, err, stdout, stderr) {
         runningTasks--;
+        if (typeof usedPorts[cmd] != 'undefined') {
+          delete usedPorts[cmd];
+        }
         this.emit('finishedTask', cmd, err, stdout, stderr);
 
         if (canStartTask()) {
