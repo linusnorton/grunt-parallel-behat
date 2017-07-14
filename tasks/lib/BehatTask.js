@@ -90,7 +90,7 @@ function BehatTask (options) {
                     file_path.splice(0, i + 1);
                 }
             }
-            var testfile = fs.readFileSync(options.junit.output_folder + feature + '.xml', 'utf8');
+            var testfile = fs.readFileSync(options.junit.output_folder + feature.toLowerCase() + '.xml', 'utf8');
             if (testfile) {
                 parseString(testfile, function (err, result) {
 
